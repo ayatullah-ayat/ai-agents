@@ -11,6 +11,8 @@ from agent_language import AgentLanguage, AgentFunctionCallingActionLanguage
 from agent import Agent
 from environment import Environment
 from prompt import Prompt
+from dotenv import load_dotenv
+load_dotenv()
 
 from groq import Groq
 
