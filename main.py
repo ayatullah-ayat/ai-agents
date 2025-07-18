@@ -41,7 +41,7 @@ def generate_response(prompt: Prompt) -> str:
         response = client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=1024
+            max_completion_tokens=1024
         )
         result = response.choices[0].message.content
     else:
@@ -49,7 +49,7 @@ def generate_response(prompt: Prompt) -> str:
             model=model,
             messages=messages,
             tools=tools,
-            max_tokens=1024
+            max_completion_tokens=1024
         )
 
         print(f"Response: {response.choices[0]}")
@@ -57,7 +57,7 @@ def generate_response(prompt: Prompt) -> str:
         if response.choices[0].message.tool_calls:
             tool = response.choices[0].message.tool_calls[0]
             args = tool.function.arguments
-            if args is None:
+            if args is None or args == 'null':
                 parsed_args = {}
             else:
                 parsed_args = json.loads(args)
@@ -75,9 +75,14 @@ def generate_response(prompt: Prompt) -> str:
 if __name__ == "__main__":
     # Define the agent's goals
     goals = [
-        Goal(priority=1, name="Gather Information", description="Get files list using tools and then Read each file in the project"),
-        Goal(priority=2, name="Terminate", description="Call the terminate call when you have read all the files "
-                                                       "and provide the content of the README in the terminate message")
+        Goal(priority=1, 
+             name="Gather Information", 
+             description="""
+             Read each file in the project"""),
+        Goal(priority=1, 
+             name="Terminate", 
+             description="""Call the terminate call when you have read all the files
+                         and provide the content of the README in the terminate message""")
     ]
 
     # Define the agent's language
@@ -134,7 +139,7 @@ if __name__ == "__main__":
     agent = Agent(goals, agent_language, action_registry, generate_response, environment)
 
     # Run the agent with user input
-    user_input = "List the files in the project and read each file's content."
+    user_input = "Write a README for this project."
     final_memory = agent.run(user_input)
 
     # Print the final memory
